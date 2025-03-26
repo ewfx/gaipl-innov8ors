@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        body {
+            display: flex;
+            flex-direction: row;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #fff;
+            color: #333;
+            transition: background 0.3s, color 0.3s;
+        }
+    
+        .dark-mode {
+            background: #333;
+            color: #fff;
+        }
+    
+        /* Sidebar */
+        .sidebar {
+            width: 20%;
+            background: #f4f4f4;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+    
+        .sidebar .brand {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+    
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+    
+        .sidebar ul li {
+            padding: 8px;
+            background: #ddd;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+    
+        .sidebar .filter, .sidebar .management {
+            background: #e3e3e3;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    
+        .sidebar label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    
+        /* Main Content */
+        .main-content {
+            width: 60%;
+            margin-left: 250px; /* Matches the sidebar width */
+            padding: 20px;
+            flex: 1;
+            box-sizing: border-box;
+            background: #fff;
+            background: var(--main-content-bg-color); /* Use dynamic background color */
+        }
+    
+        header {
+            width: 75%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 5px;
+            background: #f4f4f4;
+            border-bottom: 2px solid #ddd;
+            height: 3%;
+            
+        }
+    
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+    
+        .menu-icon {
+            font-size: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    
+        .header-left h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+    
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+    
+        .notification-icon, .user-icon {
+            font-size: 16px;
+            cursor: pointer;
+        }
+    
+            /* Status Section */
+    .status {
+        width: 75%;
+        display: flex;
+        justify-content: 5px; /* Space between cards */
+        align-items: center;
+        gap: 1%; /* Reduced spacing between cards */
+        margin-bottom: 5px; /* Reduced bottom margin for the section */
+        margin-top: 5px;
+        margin-left: 10px;
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        background: var(--main-content-bg-color); /* Use dynamic background color */
+        
+    }
+
+    .status .card {
+        flex: 1 1 calc(20% - 5px); /* Adjusted to match the reduced gap */
+        max-width: calc(25% - 5px); /* Ensure cards don't exceed 25% width */
+        background: #e3e3e3;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        margin-bottom: 5px;
+        align-items: center; /* Reduced bottom margin for individual cards */
+        /*background: var(--main-content-bg-color); /* Use dynamic background color */
+        
+    }
+    .card .number {
+                font-size: 36px;
+            }
+    @media (max-width: 768px) {
+        .status .card {
+            flex: 1 1 calc(50% - 10px); /* Each card takes 50% of the row on smaller screens */
+            max-width: calc(50% - 10px);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .status .card {
+            flex: 1 1 100%; /* Each card takes full width on very small screens */
+            max-width: 100%;
+        }
+    }
+    
+  
+    
+        /* Right Sidebar */
+        .right-sidebar {
+            width: 20%;
+            background: #f4f4f4;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            position: fixed;
+            right: 0;
+            top: 0;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.0;
+        }
+    
+        .right-sidebar h3 {
+            margin-bottom: 10px;
+        }
+    
+        .patch-list {
+            list-style: none;
+            padding: 0;
+            
+        }
+    
+        .patch-list li {
+            margin-bottom: 10px;
+            font-size: 8px;
+        }
+    
+        /* Toggle Button */
+        .toggle-dark {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 1%;
+            right: 2%;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        .toggle-dark:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+    
+        .toggle-dark i {
+            font-size: 18px;
+        }
+        
+        #deploymentText {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+    
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+    
+            .right-sidebar {
+                width: 200px;
+            }
+    
+            .main-content {
+                margin-left: 200px;
+                margin-right: 200px;
+            }
+    
+            .status .card {
+                flex: 1 1 calc(50% - 10px);
+                max-width: calc(50% - 10px);
+            }
+        }
+    
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+    
+            .right-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+    
+            .main-content {
+                margin-left: 0;
+                margin-right: 0;
+            }
+    
+            .status .card {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+            
+        }
+    </style>
+	<style>
+        /* Deployment Section */
+        .deployment {
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Space between charts */
+            align-items: top; /* Align charts vertically */
+            gap: 15px; /* Add spacing between chart containers */
+            margin-bottom: 20px; /* Add some margin below the section */
+            flex-wrap: nowrap; /* Prevent wrapping to the next row */
+            max-width: 65%;
+            margin-left: 10px;
+            text-align: left;
+        }
+        .deployment1 {
+            
+            
+            align-items: center; /* Align charts vertically */
+            gap: 5px; /* Add spacing between chart containers */
+            margin-bottom: 20px; /* Add some margin below the section */
+            flex-wrap: nowrap; /* Prevent wrapping to the next row */
+            max-width: 60%;
+            margin-left: 10px;
+            text-align: left;
+        }
+    
+        .deployment .chart-container {
+            flex: 1 1 calc(33.33% - 15px); /* Each chart takes 1/3 of the row minus the gap */
+            max-width: calc(33.33% - 15px); /* Ensure charts don't exceed 1/3 of the row */
+            background: #e3e3e3;
+            padding: 20px;
+            border-radius: 8px;
+            
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .deployment .bar-chart-container {
+            flex: 1 2 calc(20% - 10px); /* Each chart takes 1/3 of the row minus the gap */
+            max-width: calc(70% - 10px); /* Ensure charts don't exceed 1/3 of the row */
+            background: #e3e3e3;
+            padding: 5px;
+            border-radius: 8px;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding-left: 5%;
+            padding-right: 5%;
+        }    
+        @media (max-width: 768px) {
+            .deployment {
+                flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            }
+    
+            .deployment .chart-container {
+                flex: 1 1 calc(50% - 15px); /* Each chart takes 50% of the row on smaller screens */
+                max-width: calc(50% - 15px);
+            }
+        }
+    
+        @media (max-width: 480px) {
+            .deployment .chart-container {
+                flex: 1 1 100%; /* Each chart takes full width on very small screens */
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <button class="toggle-dark" title="Switch to Dark Mode">
+        <i class="fas fa-moon"></i>
+    </button>
+    	
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+    <h2 class="brand">
+        <span class="axiom">Infra</span><span class="ex">AiOps</span>
+    </h2>
+    <ul>
+        <li><i class="fas fa-rocket"></i><a href="get-started.html" style="text-decoration: none; color: inherit;"> Get Started</a></li>
+        <li><i class="fas fa-tachometer-alt"></i> <a href="dashboard.html" style="text-decoration: none; color: inherit;"> Dashboard</a></li>
+        <li><i class="fas fa-server"></i><a href="devices.html" style="text-decoration: none; color: inherit;"> Network Map</a></li>
+        <li><i class="fas fa-plug"></i> Events & Alarms</li>
+        <li><i class="fas fa-chart-line"></i> Telemetry</li>
+        <li><i class="fas fa-ticket-alt"></i> Ticketing</li>
+        <li><i class="fas fa-cogs"></i> Jobs</li>
+        <li><i class="fas fa-star"></i><a href="favourites.html" style="text-decoration: none; color: inherit;"> Favourites</a> </li>
+        <li><i class="fas fa-history"></i> Recents</li>
+        <li><i class="fas fa-robot"></i> Automation</li>
+        <li><i class="fa fa-cog fa-spin fa-1x fa-fw"></i> Settings</li>
+    </ul>
+
+   
+</div>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <section class="heaeder">
+        <header>
+			<div class="header-left">
+				<h1>Dashboard (Global)</h1>
+			</div>
+			<div class="header-right">
+				<span class="notification-icon">🔔</span> <!-- Notification Icon -->
+				<span class="user-icon">👤</span> <!-- User Profile Icon -->
+			</div>
+		</header>
+    </section>
+
+        
+        <!-- Status Section -->
+        <section class="status">
+            <div class="card">Overall Compliance <br> <span class="number"style="color: red;">84%</span></div>
+            <div class="card">Daytime Patching <br> <span class="number" style="color: green;">0</span></div>
+            <div class="card">Automation Jobs <br> <span class="number" style="color: rgb(0, 183, 255);">1008</span></div>
+            <div class="card">Pending Reboot <br> <span class="number" style="color: orange;">887</span></div>
+        </section>
+
+        <!-- Deployment Charts -->
+        <section class="deployment">
+            <div class="chart-container">
+                <div style="text-align: left;">
+                    <canvas id="deploymentChart"></canvas>
+                    <p id="deploymentText">Vulnerability Compliance</p>
+                </div>
+                
+            </div>
+
+			<div class="chart-container">
+                <div style="text-align: left;">
+                <canvas id="deploymentChart1"></canvas>
+                <p id="deploymentText">Patch Compliance</p>
+            </div>
+            </div>
+			<div class="chart-container">
+                <div style="text-align: center;">
+                <canvas id="deploymentChart2"></canvas>
+                <p id="deploymentText">Configuration Compliance</p>
+            </div>
+            </div>
+        </section>
+
+        <!-- Compliance Charts -->
+        <section class="deployment">
+            <div class="bar-chart-container">
+                <div style="text-align: left;">
+                <canvas id="complianceChart"></canvas>
+                <p id="deploymentText">Configuration Compliance</p>
+            </div>
+            </div>
+  
+            <div class="bar-chart-container">
+                <canvas id="complianceChart1"></canvas>
+                <p id="deploymentText">Configuration Compliance</p>
+            </div>
+        </section>        
+    </div>
+
+    <!-- Right Sidebar for Patches -->
+    <div class="right-sidebar">
+        <h3>Recent Patch Releases</h3>
+        <ul class="patch-list">
+            <li>Security Update for Windows 7 (KB5022338) - <a href="https://support.microsoft.com/en-us/topic/january-10-2023-kb5022338-monthly-rollup-6b406e1d-69b2-4e6a-b13e-053d22268e13" class="patch-status">0%</a></li>
+            <li>Security Update for Windows 7 (KB5021291) - <a href="https://support.microsoft.com/en-us/topic/december-13-2022-kb5021291-monthly-rollup-8f1f6a0d-8a1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">0%</a></li>
+            <li>Security Update for Windows 7 (KB5020000) - <a href="https://support.microsoft.com/en-us/topic/november-8-2022-kb5020000-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">0%</a></li>
+            <li>Security Update for Windows 7 (KB5018454) - <a href="https://support.microsoft.com/en-us/topic/october-11-2022-kb5018454-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">0%</a></li>
+            <li>Security Update for Windows 7 (KB5017361) - <a href="https://support.microsoft.com/en-us/topic/september-13-2022-kb5017361-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">0%</a></li>
+            <li>Security Update for Windows 7 (KB5016676) - <a href="https://support.microsoft.com/en-us/topic/august-9-2022-kb5016676-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">10%</a></li>
+            <li>Security Update for Windows 7 (KB5015861) - <a href="https://support.microsoft.com/en-us/topic/july-12-2022-kb5015861-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">20%</a></li>
+            <li>Security Update for Windows 7 (KB5014742) - <a href="https://support.microsoft.com/en-us/topic/june-14-2022-kb5014742-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">10%</a></li>
+            <li>Security Update for Windows 7 (KB5014012) - <a href="https://support.microsoft.com/en-us/topic/may-10-2022-kb5014012-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">5%</a></li>
+            <li>Security Update for Windows 7 (KB5012649) - <a href="https://support.microsoft.com/en-us/topic/april-12-2022-kb5012649-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">30%</a></li>
+            <li>Security Update for Windows 7 (KB5011564) - <a href="https://support.microsoft.com/en-us/topic/march-8-2022-kb5011564-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">24%</a></li>
+            <li>Security Update for Windows 7 (KB5011503) - <a href="https://support.microsoft.com/en-us/topic/february-8-2022-kb5011503-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">45%</a></li>
+            <li>Security Update for Windows 7 (KB5010798) - <a href="https://support.microsoft.com/en-us/topic/january-11-2022-kb5010798-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">50%</a></li>
+            <li>Security Update for Windows 7 (KB5009610) - <a href="https://support.microsoft.com/en-us/topic/december-14-2021-kb5009610-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">20%</a></li>
+            <li>Security Update for Windows 7 (KB5008206) - <a href="https://support.microsoft.com/en-us/topic/november-9-2021-kb5008206-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">45%</a></li>
+            <li>Security Update for Windows 7 (KB5007236) - <a href="https://support.microsoft.com/en-us/topic/october-12-2021-kb5007236-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">10%</a></li>
+            <li>Security Update for Windows 7 (KB5006675) - <a href="https://support.microsoft.com/en-us/topic/october-12-2021-kb5006675-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">70%</a></li>
+            <li>Security Update for Windows 7 (KB5005615) - <a href="https://support.microsoft.com/en-us/topic/september-14-2021-kb5005615-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">50%</a></li>
+            <li>Security Update for Windows 7 (KB5005568) - <a href="https://support.microsoft.com/en-us/topic/august-10-2021-kb5005568-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">90%</a></li>
+            <li>Security Update for Windows 7 (KB5005088) - <a href="https://support.microsoft.com/en-us/topic/july-13-2021-kb5005088-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">20%</a></li>
+            <li>Security Update for Windows 7 (KB5004233) - <a href="https://support.microsoft.com/en-us/topic/june-8-2021-kb5004233-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">30%</a></li>
+            <li>Security Update for Windows 7 (KB5003694) - <a href="https://support.microsoft.com/en-us/topic/may-11-2021-kb5003694-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">30%</a></li>
+            <li>Security Update for Windows 7 (KB5003228) - <a href="https://support.microsoft.com/en-us/topic/april-13-2021-kb5003228-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">53%</a></li>
+            <li>Security Update for Windows 7 (KB5001335) - <a href="https://support.microsoft.com/en-us/topic/march-9-2021-kb5001335-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">23%</a></li>
+            <li>Security Update for Windows 7 (KB5000841) - <a href="https://support.microsoft.com/en-us/topic/february-9-2021-kb5000841-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">43</a></li>
+            <li>Security Update for Windows 7 (KB4598279) - <a href="https://support.microsoft.com/en-us/topic/january-12-2021-kb4598279-monthly-rollup-4b1a6a8e-6b1e-4b9d-8c4d-7c9e3c3ff7b4" class="patch-status">80%</a></li>
+
+        </ul>    </div>
+</body>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("Dashboard Loaded");
+
+    // Dark Mode Toggle
+    const toggleDarkBtn = document.querySelector(".toggle-dark");
+    const body = document.body;
+
+    // Check for saved dark mode preference
+    if (localStorage.getItem("darkMode") === "enabled") {
+        body.classList.add("dark-mode");
+    }
+
+    toggleDarkBtn.addEventListener("click", function() {
+        body.classList.toggle("dark-mode");
+
+        // Save user preference in localStorage
+        if (body.classList.contains("dark-mode")) {
+            localStorage.setItem("darkMode", "enabled");
+        } else {
+            localStorage.setItem("darkMode", "disabled");
+        }
+    });
+	// Charts
+            const deploymentCtx = document.getElementById("deploymentChart").getContext("2d");
+            new Chart(deploymentCtx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Compliant", "Non-Compliant", "High-Risk"],
+                    datasets: [{
+                        data: [80, 12, 8],
+                        backgroundColor: ["#009900", "#FBFF00", "#ff0000"]
+                    }]
+                }
+            });
+			const deploymentCtx1 = document.getElementById("deploymentChart1").getContext("2d");
+            new Chart(deploymentCtx1, {
+                type: "doughnut",
+                data: {
+                    labels: ["Fully Patched", "Partially Patched", "Unpatched"],
+                    datasets: [{
+                        data: [80, 15, 5],
+                        backgroundColor: ["#009900", "#FBFF00", "#ff0000"]
+                    }]
+                }
+            });
+			const deploymentCtx2 = document.getElementById("deploymentChart2").getContext("2d");
+            new Chart(deploymentCtx2, {
+                type: "doughnut",
+                data: {
+                    labels: ["Compliant", "Deviated ", "Non-Compliant"],
+                    datasets: [{
+                        data: [85, 7, 8],
+                        backgroundColor: ["#009900", "#FBFF00", "#ff0000"]
+                    }]
+                }
+            });
+			const complianceCtx = document.getElementById("complianceChart").getContext("2d");
+            new Chart(complianceCtx, {
+                type: "bar",
+                data: {
+                    labels: ["Critical", "Important", "Moderate", "Low"],
+                    datasets: [{
+                        label: "Compliance %",
+                        data: [52, 52, 83, 87],
+                        backgroundColor: ["#ff0000", "#ff6600", "#00cc00", "#009900"]
+                    }]
+                }
+            });
+            const complianceCtx1 = document.getElementById("complianceChart1").getContext("2d");
+            new Chart(complianceCtx1, {
+                type: "bar",
+                data: {
+                    labels: ["Critical", "Important", "Moderate", "Low"],
+                    datasets: [{
+                        label: "Compliance %",
+                        data: [52, 52, 83, 87],
+                        backgroundColor: ["#ff0000", "#ff6600", "#00cc00", "#009900"]
+                    }]
+                }
+            });
+});
+
+
+
+</script>
+</html>
